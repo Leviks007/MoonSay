@@ -7,6 +7,23 @@ import (
 	"time"
 )
 
+var db *sql.DB
+
+func InitDB() {
+	var err error
+	db, err = sql.Open("mysql", "root:root@tcp(127.0.0.1:8889)/Golang")
+	if err != nil {
+		panic(err)
+	}
+}
+
+func CloseDB() {
+	err := db.Close()
+	if err != nil {
+		fmt.Println("Error closing the database connection:", err)
+	}
+}
+
 func connectToDB() *sql.DB {
 	db, err := sql.Open("mysql", "root:root@tcp(127.0.0.1:8889)/Golang")
 	if err != nil {
@@ -15,6 +32,7 @@ func connectToDB() *sql.DB {
 
 	return db
 }
+
 func closeDB(db *sql.DB) {
 	err := db.Close()
 	if err != nil {
@@ -31,8 +49,6 @@ type UserData struct {
 
 func GetUserData(Id int64) *UserData {
 
-	db := connectToDB()
-	defer closeDB(db)
 	var user UserData
 
 	res, err := db.Query(fmt.Sprintf("SELECT `IdUser`,`Position` FROM `UsersTelega` WHERE `IdUser` = '%d'", Id))
@@ -54,8 +70,6 @@ func GetUserData(Id int64) *UserData {
 
 func GetUserZodiac(Id int64) string {
 
-	db := connectToDB()
-	defer closeDB(db)
 	var user UserData
 
 	res, err := db.Query(fmt.Sprintf("SELECT `IdUser`,`ZodiacSign` FROM `UsersTelega` WHERE `IdUser` = '%d'", Id))
@@ -78,9 +92,6 @@ func GetUserZodiac(Id int64) string {
 
 func AddUser(Id int64, date time.Time, zodiac int) {
 
-	db := connectToDB()
-	defer closeDB(db)
-
 	insert, err := db.Query(fmt.Sprintf("INSERT INTO `UsersTelega`(`IdUser`,`DateOfBirth`,`ZodiacSign`) "+
 		"VALUES ('%d','%d','%d')", Id, date, zodiac))
 	if err != nil {
@@ -97,8 +108,6 @@ func AddUser(Id int64, date time.Time, zodiac int) {
 
 func AddUserId(Id int64) {
 
-	db := connectToDB()
-	defer closeDB(db)
 	insert, err := db.Query(fmt.Sprintf("INSERT INTO `UsersTelega`(`IdUser`,`Position`) "+
 		"VALUES ('%d','%d')", Id, 0))
 	if err != nil {
@@ -114,8 +123,7 @@ func AddUserId(Id int64) {
 }
 
 func UpdateZodiacSign(Id int64, ZodiacSign string) {
-	db := connectToDB()
-	defer closeDB(db)
+
 	update, err := db.Query(fmt.Sprintf("UPDATE `UsersTelega` SET `ZodiacSign` = '%s' WHERE `IdUser` = '%d' ", ZodiacSign, Id))
 	if err != nil {
 		panic(err)
@@ -130,8 +138,7 @@ func UpdateZodiacSign(Id int64, ZodiacSign string) {
 }
 
 func UpdatePosition(Id int64, position int) {
-	db := connectToDB()
-	defer closeDB(db)
+
 	update, err := db.Query(fmt.Sprintf("UPDATE `UsersTelega` SET `Position` = '%d' WHERE `IdUser` = '%d' ", position, Id))
 	if err != nil {
 		panic(err)
@@ -147,8 +154,6 @@ func UpdatePosition(Id int64, position int) {
 
 func Gethoroscope(ZodiacSign string) string {
 
-	db := connectToDB()
-	defer closeDB(db)
 	Horoscope := ""
 
 	res, err := db.Query(fmt.Sprintf("SELECT `Horoscope` FROM `Horoscope` WHERE `ZodiacSign` = '%s'", ZodiacSign))

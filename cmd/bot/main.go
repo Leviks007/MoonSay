@@ -4,6 +4,7 @@ import (
 	"flag"
 	"log"
 	"telegaBot/internal/app/commands"
+	"telegaBot/internal/service/DataBases"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -21,6 +22,7 @@ func main() {
 
 	bot.Debug = true
 
+	DataBases.InitDB()
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
 	u := tgbotapi.UpdateConfig{
